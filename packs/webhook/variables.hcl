@@ -79,7 +79,7 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-ionscale"
+        name         = "connect-proxy-webhook"
         to           = -1
         static       = 0
         host_network = "connect"
@@ -157,7 +157,7 @@ variable "services" {
   )
   default = [
     {
-      name     = "ionscale"
+      name     = "webhook"
       port     = "8080"
       tags     = []
       provider = "consul"
@@ -167,7 +167,7 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-ionscale"
+            port = "connect-proxy-webhook"
             proxy = {
               expose    = []
               upstreams = []
@@ -206,9 +206,9 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "ghcr.io/jsiebens/ionscale:latest"
+    image      = "ghcr.io/krabiworld/webhook:main"
     entrypoint = null
-    args       = ["--config", "$${NOMAD_TASK_DIR}/config.yml", "server"]
+    args       = null
     volumes    = []
     privileged = false
   }
@@ -225,24 +225,22 @@ variable "templates" {
       env           = bool
     })
   )
-  default = [
-    {
-      data          = <<EOH
----
-listen_addr: "127.0.0.1:8080"
-      EOH
-      destination   = "$${NOMAD_TASK_DIR}/config.yml"
-      change_mode   = "restart"
-      change_signal = null
-      env           = false
-    }
-  ]
+  default = []
 }
 
 variable "environment" {
   description = "Environment variables to pass to task."
   type        = map(string)
-  default     = {}
+  default = {
+    RUST_LOG        = "info"
+    ADDR            = "0.0.0.0"
+    PORT            = 8080
+    SIGNATURE_CHECK = false
+    SECRET          = "random-string"
+    HAPPY_EMOJI     = ":tada:"
+    SUCCESS_EMOJI   = ":ok:"
+    FAILURE_EMOJI   = ":boom:"
+  }
 }
 
 variable "artifacts" {
@@ -264,8 +262,8 @@ variable "resources" {
     memory = number
   })
   default = {
-    cpu    = 50,
-    memory = 128
+    cpu    = 16,
+    memory = 64
   }
 }
 
