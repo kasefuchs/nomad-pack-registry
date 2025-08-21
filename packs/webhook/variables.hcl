@@ -206,7 +206,7 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "ghcr.io/krabiworld/webhook:main"
+    image      = "ghcr.io/krabiworld/webhook:latest"
     entrypoint = null
     args       = null
     volumes    = []
@@ -232,9 +232,8 @@ variable "environment" {
   description = "Environment variables to pass to task."
   type        = map(string)
   default = {
-    RUST_LOG        = "info"
-    ADDR            = "0.0.0.0"
-    PORT            = 8080
+    LOG_LEVEL       = "info"
+    ADDR            = "0.0.0.0:8080"
     SIGNATURE_CHECK = false
     SECRET          = "random-string"
     HAPPY_EMOJI     = ":tada:"
