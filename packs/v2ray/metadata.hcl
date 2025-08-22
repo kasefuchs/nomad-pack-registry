@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "v2ray"
-  description = "A platform for building proxies to bypass network restrictions."
-  version     = "0.1.0"
+  name    = "v2ray"
+  version = "0.1.0"
 }

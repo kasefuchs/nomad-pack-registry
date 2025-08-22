@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "prometheus"
-  description = "Prometheus is an open-source systems monitoring and alerting toolkit."
-  version     = "0.1.0"
+  name    = "prometheus"
+  version = "0.1.0"
 }

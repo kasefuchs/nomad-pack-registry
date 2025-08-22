@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "byedpi"
-  description = "Implementation of some DPI bypass methods."
-  version     = "0.1.0"
+  name    = "byedpi"
+  version = "0.1.0"
 }

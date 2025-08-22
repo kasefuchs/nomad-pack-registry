@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "webhook"
-  description = "A beautiful GitHub webhook proxy for Discord."
-  version     = "0.1.0"
+  name    = "webhook"
+  version = "0.1.0"
 }

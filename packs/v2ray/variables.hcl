@@ -2,19 +2,16 @@
 # SPDX-License-Identifier: MIT
 
 variable "job_name" {
-  description = "The name to use as the job name which overrides using the pack name."
-  type        = string
-  default     = ""
+  type    = string
+  default = ""
 }
 
 variable "job_type" {
-  description = "Specifies the Nomad scheduler to use."
-  type        = string
-  default     = "service"
+  type    = string
+  default = "service"
 }
 
 variable "ui" {
-  description = "Options to modify the presentation of the Job index page in the Web UI."
   type = object({
     description = string
     links = list(
@@ -28,25 +25,21 @@ variable "ui" {
 }
 
 variable "region" {
-  description = "The region where jobs will be deployed."
-  type        = string
-  default     = "global"
+  type    = string
+  default = "global"
 }
 
 variable "namespace" {
-  description = "The namespace in which to execute the job."
-  type        = string
-  default     = "default"
+  type    = string
+  default = "default"
 }
 
 variable "datacenters" {
-  description = "A list of datacenters in the region which are eligible for task placement."
-  type        = list(string)
-  default     = ["*"]
+  type    = list(string)
+  default = ["*"]
 }
 
 variable "constraints" {
-  description = "Additional constraints to apply to the job."
   type = list(
     object({
       attribute = string
@@ -58,7 +51,6 @@ variable "constraints" {
 }
 
 variable "network" {
-  description = "Networking requirements."
   type = object({
     mode = string
     ports = list(
@@ -83,7 +75,6 @@ variable "network" {
 }
 
 variable "services" {
-  description = "Specifies integrations for service discovery."
   type = list(
     object({
       name     = string
@@ -152,7 +143,6 @@ variable "services" {
 }
 
 variable "vault" {
-  description = "Allows a task to specify that it requires a token from a HashiCorp Vault server."
   type = object({
     env           = bool
     role          = string
@@ -163,13 +153,11 @@ variable "vault" {
 }
 
 variable "consul" {
-  description = "Specifies Consul configuration options specific to a task."
-  type        = object({})
-  default     = null
+  type    = object({})
+  default = null
 }
 
 variable "docker_config" {
-  description = "Docker driver task configuration."
   type = object({
     image      = string
     entrypoint = list(string)
@@ -187,7 +175,6 @@ variable "docker_config" {
 }
 
 variable "templates" {
-  description = "List of templates to render."
   type = list(
     object({
       data          = string
@@ -224,13 +211,11 @@ variable "templates" {
 }
 
 variable "environment" {
-  description = "Environment variables to pass to task."
-  type        = map(string)
-  default     = {}
+  type    = map(string)
+  default = {}
 }
 
 variable "artifacts" {
-  description = "Instructs Nomad to fetch and unpack a remote resource."
   type = list(
     object({
       source      = string
@@ -242,7 +227,6 @@ variable "artifacts" {
 }
 
 variable "resources" {
-  description = "The resource to assign to the application."
   type = object({
     cpu    = number
     memory = number
@@ -254,7 +238,6 @@ variable "resources" {
 }
 
 variable "volumes" {
-  description = "Volumes to require."
   type = list(
     object({
       name            = string
@@ -269,7 +252,6 @@ variable "volumes" {
 }
 
 variable "volume_mounts" {
-  description = "Volumes to mount."
   type = list(
     object({
       volume        = string
@@ -282,7 +264,6 @@ variable "volume_mounts" {
 }
 
 variable "restart" {
-  description = "Configures a task behavior on failure."
   type = object({
     attempts         = number
     delay            = string
@@ -300,7 +281,6 @@ variable "restart" {
 }
 
 variable "identities" {
-  description = "Allows a task access to its Workload Identity via an environment variable or file."
   type = list(
     object({
       name          = string
@@ -315,7 +295,6 @@ variable "identities" {
 }
 
 variable "count" {
-  description = "Specifies the number of instances that should be running under for this group."
-  type        = number
-  default     = 1
+  type    = number
+  default = 1
 }

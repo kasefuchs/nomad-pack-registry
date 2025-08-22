@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "shiori"
-  description = "Shiori is a simple bookmarks manager written in the Go language."
-  version     = "0.1.0"
+  name    = "shiori"
+  version = "0.1.0"
 }

@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "dufs"
-  description = "A file server that supports static serving, uploading, searching, accessing control, webdav..."
-  version     = "0.1.0"
+  name    = "dufs"
+  version = "0.1.0"
 }

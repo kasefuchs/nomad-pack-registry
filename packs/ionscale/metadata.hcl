@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "ionscale"
-  description = "A lightweight implementation of a Tailscale control server."
-  version     = "0.1.0"
+  name    = "ionscale"
+  version = "0.1.0"
 }

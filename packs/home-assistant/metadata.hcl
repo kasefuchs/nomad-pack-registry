@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "home-assistant"
-  description = "Open source home automation that puts local control and privacy first."
-  version     = "0.1.0"
+  name    = "home-assistant"
+  version = "0.1.0"
 }

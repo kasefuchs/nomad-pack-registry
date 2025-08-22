@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "sing-box"
-  description = "The universal proxy platform."
-  version     = "0.1.0"
+  name    = "sing-box"
+  version = "0.1.0"
 }

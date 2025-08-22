@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "gonic"
-  description = "Music streaming server / free-software subsonic server API implementation."
-  version     = "0.1.0"
+  name    = "gonic"
+  version = "0.1.0"
 }

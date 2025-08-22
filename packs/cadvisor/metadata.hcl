@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "cadvisor"
-  description = "Analyzes resource usage and performance characteristics of running containers."
-  version     = "0.1.0"
+  name    = "cadvisor"
+  version = "0.1.0"
 }

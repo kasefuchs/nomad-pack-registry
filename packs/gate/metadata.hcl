@@ -6,7 +6,6 @@ app {
 }
 
 pack {
-  name        = "gate"
-  description = "The Lightweight Minecraft Proxy."
-  version     = "0.1.0"
+  name    = "gate"
+  version = "0.1.0"
 }
