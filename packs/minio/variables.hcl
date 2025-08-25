@@ -201,6 +201,7 @@ variable "services" {
                   listener_port = "service-check-minio-api"
                 }
               ]
+              config    = {}
               upstreams = []
             }
           }
@@ -221,6 +222,7 @@ variable "services" {
             port = "connect-proxy-minio-console"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }
@@ -322,7 +324,7 @@ variable "volumes" {
       name            = "data"
       source          = "minio-data"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     }
   ]

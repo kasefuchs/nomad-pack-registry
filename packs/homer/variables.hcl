@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-homer"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-cadvisor"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

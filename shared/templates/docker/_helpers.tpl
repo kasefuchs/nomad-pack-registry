@@ -83,7 +83,10 @@
 [[- $proxy := . -]]
           proxy {
             [[ if $proxy.expose -]]
-            [[ template "expose" $proxy.expose ]]
+            [[ template "proxy_expose" $proxy.expose ]]
+            [[ end -]]
+            [[ if $proxy.config -]]
+            [[ template "proxy_config" $proxy.config ]]
             [[ end -]]
             [[- range $upstream := $proxy.upstreams ]]
             [[ template "upstream" $upstream ]]
@@ -91,7 +94,7 @@
           }
 [[- end -]]
 
-[[ define "expose" -]]
+[[ define "proxy_expose" -]]
 [[- $expose := . -]]
             expose {
               [[- range $path := $expose ]]
@@ -104,6 +107,14 @@
               [[- end ]]
             }
 [[- end -]]
+
+[[ define "proxy_config" -]]
+            config {
+              [[- range $key, $var := . ]]
+              [[ $key ]] = "[[ $var ]]"
+              [[- end ]]
+            }
+[[- end ]]
 
 [[ define "upstream" -]]
 [[- $upstream := . -]]
@@ -131,8 +142,10 @@
     service {
       name     = [[ $service.name | quote ]]
       port     = [[ $service.port | quote ]]
-      tags     = [[ $service.tags | toStringList ]]
       provider = [[ $service.provider | quote ]]
+      [[ if $service.tags -]]
+      tags = [[ $service.tags | toStringList ]]
+      [[ end -]]
       [[ if $service.connect -]]
       [[ template "connect" $service.connect ]]
       [[ end -]]
@@ -307,7 +320,7 @@
       type      = [[ $volume.type | quote ]]
       source    = [[ $volume.source | quote ]]
       read_only = [[ $volume.read_only ]]
-      [[ if eq $volume.type "csi" -]]
+      [[ if has $volume.type (list "csi" "host") -]]
       access_mode     = [[ $volume.access_mode | quote ]]
       attachment_mode = [[ $volume.attachment_mode | quote ]]
       [[ end -]]

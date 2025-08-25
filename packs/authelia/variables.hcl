@@ -195,6 +195,7 @@ variable "services" {
                   listener_port = "service-check-authelia"
                 }
               ]
+              config    = {}
               upstreams = []
             }
           }

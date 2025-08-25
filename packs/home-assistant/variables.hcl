@@ -167,6 +167,7 @@ variable "services" {
             port = "connect-proxy-home-assistant"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }
@@ -249,7 +250,7 @@ variable "volumes" {
       name            = "config"
       source          = "home-assistant-config"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     }
   ]

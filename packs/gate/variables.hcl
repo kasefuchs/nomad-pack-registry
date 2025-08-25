@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-gate"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

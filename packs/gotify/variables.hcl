@@ -195,6 +195,7 @@ variable "services" {
                   listener_port = "service-check-gotify"
                 }
               ]
+              config    = {}
               upstreams = []
             }
           }
@@ -309,7 +310,7 @@ variable "volumes" {
       name            = "data"
       source          = "gotify-data"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     }
   ]

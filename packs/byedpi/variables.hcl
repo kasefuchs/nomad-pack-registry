@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-byedpi"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

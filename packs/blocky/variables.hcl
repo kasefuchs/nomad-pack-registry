@@ -173,6 +173,7 @@ variable "services" {
             port = "connect-proxy-blocky-http"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }
@@ -193,6 +194,7 @@ variable "services" {
             port = "connect-proxy-blocky-dns"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

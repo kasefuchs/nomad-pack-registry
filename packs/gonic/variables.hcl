@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-gonic"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }
@@ -259,7 +260,7 @@ variable "volumes" {
       name            = "data"
       source          = "gonic-data"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     },
     {
@@ -267,7 +268,7 @@ variable "volumes" {
       name            = "music"
       source          = "gonic-music"
       read_only       = true
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     },
     {
@@ -275,7 +276,7 @@ variable "volumes" {
       name            = "podcasts"
       source          = "gonic-podcasts"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     },
     {
@@ -283,7 +284,7 @@ variable "volumes" {
       name            = "playlists"
       source          = "gonic-playlists"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     },
     {
@@ -291,7 +292,7 @@ variable "volumes" {
       name            = "cache"
       source          = "gonic-cache"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     }
   ]

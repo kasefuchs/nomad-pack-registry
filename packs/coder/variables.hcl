@@ -195,6 +195,7 @@ variable "services" {
                   listener_port = "service-check-coder"
                 }
               ]
+              config    = {}
               upstreams = []
             }
           }

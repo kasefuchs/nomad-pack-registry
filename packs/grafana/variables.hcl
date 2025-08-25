@@ -195,6 +195,7 @@ variable "services" {
                   listener_port = "service-check-grafana"
                 }
               ]
+              config    = {}
               upstreams = []
             }
           }
@@ -277,7 +278,7 @@ variable "volumes" {
       name            = "data"
       source          = "grafana-data"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     }
   ]

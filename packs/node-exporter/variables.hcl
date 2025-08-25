@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-node-exporter"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

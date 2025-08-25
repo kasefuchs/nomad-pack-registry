@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-webhook"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

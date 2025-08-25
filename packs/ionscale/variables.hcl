@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-ionscale"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

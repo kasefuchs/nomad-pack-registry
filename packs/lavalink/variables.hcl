@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-lavalink"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }

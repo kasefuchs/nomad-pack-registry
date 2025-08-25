@@ -161,6 +161,7 @@ variable "services" {
             port = "connect-proxy-shiori"
             proxy = {
               expose    = []
+              config    = {}
               upstreams = []
             }
           }
@@ -261,7 +262,7 @@ variable "volumes" {
       name            = "data"
       source          = "shiori-data"
       read_only       = false
-      access_mode     = "single-node-writer"
+      access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
     }
   ]
