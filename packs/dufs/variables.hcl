@@ -71,13 +71,13 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-dufs"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
       },
       {
-        name         = "service-check-dufs"
+        name         = "service-check"
         to           = -1
         static       = 0
         host_network = "private"
@@ -170,7 +170,7 @@ variable "services" {
           name            = null
           path            = "/__dufs__/health"
           expose          = false
-          port            = "service-check-dufs"
+          port            = "service-check"
           protocol        = "http"
           task            = null
           timeout         = "5s"
@@ -185,14 +185,14 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-dufs"
+            port = "envoy-proxy"
             proxy = {
               expose = [
                 {
                   path          = "/__dufs__/health"
                   protocol      = "http"
                   local_port    = 8080
-                  listener_port = "service-check-dufs"
+                  listener_port = "service-check"
                 }
               ]
               config    = {}
@@ -245,6 +245,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = []

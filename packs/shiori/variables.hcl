@@ -71,7 +71,7 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-shiori"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
@@ -158,7 +158,7 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-shiori"
+            port = "envoy-proxy"
             proxy = {
               expose    = []
               config    = {}
@@ -211,6 +211,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = []
@@ -260,7 +263,7 @@ variable "volumes" {
     {
       type            = "host"
       name            = "data"
-      source          = "shiori-data"
+      source          = "shiori"
       read_only       = false
       access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"

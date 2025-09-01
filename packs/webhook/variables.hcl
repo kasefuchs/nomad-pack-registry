@@ -71,7 +71,7 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-webhook"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
@@ -158,7 +158,7 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-webhook"
+            port = "envoy-proxy"
             proxy = {
               expose    = []
               config    = {}
@@ -211,6 +211,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = []
@@ -219,12 +222,13 @@ variable "templates" {
 variable "environment" {
   type = map(string)
   default = {
-    LOG_LEVEL     = "info"
-    ADDR          = "0.0.0.0:8080"
-    SECRET        = "random-string"
-    HAPPY_EMOJI   = ":tada:"
-    SUCCESS_EMOJI = ":ok:"
-    FAILURE_EMOJI = ":boom:"
+    LOG_LEVEL         = "info"
+    ADDR              = "0.0.0.0:8080"
+    SECRET            = "random-string"
+    HAPPY_EMOJI       = ":tada:"
+    SUCCESS_EMOJI     = ":ok:"
+    FAILURE_EMOJI     = ":boom:"
+    IGNORED_WORKFLOWS = "CodeQL,Automatic Dependency Submission,Dependabot Updates"
   }
 }
 

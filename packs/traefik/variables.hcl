@@ -201,6 +201,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = [
@@ -222,6 +225,9 @@ entryPoints:
       change_mode   = "restart"
       change_signal = null
       env           = false
+      perms         = null
+      uid           = -1
+      gid           = -1
     }
   ]
 }

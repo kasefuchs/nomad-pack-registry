@@ -71,13 +71,13 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-prometheus"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
       },
       {
-        name         = "service-check-prometheus"
+        name         = "service-check"
         to           = -1
         static       = 0
         host_network = "private"
@@ -170,7 +170,7 @@ variable "services" {
           name            = null
           path            = "/-/healthy"
           expose          = false
-          port            = "service-check-prometheus"
+          port            = "service-check"
           protocol        = "http"
           task            = null
           timeout         = "5s"
@@ -185,14 +185,14 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-prometheus"
+            port = "envoy-proxy"
             proxy = {
               expose = [
                 {
                   path          = "/-/healthy"
                   protocol      = "http"
                   local_port    = 9090
-                  listener_port = "service-check-prometheus"
+                  listener_port = "service-check"
                 }
               ]
               config    = {}
@@ -256,6 +256,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = [
@@ -269,6 +272,9 @@ global:
       change_mode   = "restart"
       change_signal = null
       env           = false
+      perms         = null
+      uid           = -1
+      gid           = -1
     }
   ]
 }
@@ -288,7 +294,7 @@ variable "volumes" {
     {
       type            = "host"
       name            = "data"
-      source          = "prometheus-data"
+      source          = "prometheus"
       read_only       = false
       access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"

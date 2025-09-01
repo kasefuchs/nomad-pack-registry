@@ -77,7 +77,7 @@ variable "network" {
         host_network = "connect"
       },
       {
-        name         = "connect-proxy-postgresql"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
@@ -185,7 +185,7 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-postgresql"
+            port = "envoy-proxy"
             proxy = {
               expose    = []
               config    = {}
@@ -238,6 +238,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = []
@@ -285,7 +288,7 @@ variable "volumes" {
     {
       type            = "host"
       name            = "data"
-      source          = "postgresql-data"
+      source          = "postgresql"
       read_only       = false
       access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"

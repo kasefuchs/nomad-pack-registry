@@ -71,7 +71,7 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-gonic"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
@@ -158,7 +158,7 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-gonic"
+            port = "envoy-proxy"
             proxy = {
               expose    = []
               config    = {}
@@ -211,6 +211,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = []

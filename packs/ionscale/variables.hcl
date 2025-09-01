@@ -71,7 +71,7 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-ionscale"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
@@ -158,7 +158,7 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-ionscale"
+            port = "envoy-proxy"
             proxy = {
               expose    = []
               config    = {}
@@ -211,6 +211,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = [
@@ -223,6 +226,9 @@ listen_addr: "127.0.0.1:8080"
       change_mode   = "restart"
       change_signal = null
       env           = false
+      perms         = null
+      uid           = -1
+      gid           = -1
     }
   ]
 }

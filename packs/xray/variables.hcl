@@ -68,22 +68,9 @@ variable "network" {
     })
   })
   default = {
-    mode = "bridge"
-    ports = [
-      {
-        name         = "envoy-proxy"
-        to           = -1
-        static       = 0
-        host_network = "connect"
-      },
-      {
-        name         = "service-check"
-        to           = -1
-        static       = 0
-        host_network = "private"
-      }
-    ]
-    dns = null
+    mode  = "bridge"
+    ports = []
+    dns   = null
   }
 }
 
@@ -152,57 +139,7 @@ variable "services" {
       })
     })
   )
-  default = [
-    {
-      name     = "grafana"
-      port     = "3000"
-      tags     = []
-      provider = "consul"
-      checks = [
-        {
-          address_mode    = null
-          args            = null
-          restart         = null
-          command         = null
-          interval        = "30s"
-          method          = null
-          body            = null
-          name            = null
-          path            = "/api/health"
-          expose          = false
-          port            = "service-check"
-          protocol        = "http"
-          task            = null
-          timeout         = "5s"
-          type            = "http"
-          tls_server_name = null
-          tls_skip_verify = false
-          headers         = null
-        }
-      ]
-      connect = {
-        native = false
-        sidecar = {
-          task = null
-          service = {
-            port = "envoy-proxy"
-            proxy = {
-              expose = [
-                {
-                  path          = "/api/health"
-                  protocol      = "http"
-                  local_port    = 3000
-                  listener_port = "service-check"
-                }
-              ]
-              config    = {}
-              upstreams = []
-            }
-          }
-        }
-      }
-    }
-  ]
+  default = []
 }
 
 variable "vault" {
@@ -229,9 +166,9 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "grafana/grafana-oss:latest"
-    entrypoint = null
-    args       = null
+    image      = "teddysun/xray:latest"
+    entrypoint = ["/usr/bin/xray"]
+    args       = ["run", "-c", "$${NOMAD_TASK_DIR}/config.json"]
     volumes    = []
     privileged = false
   }
@@ -250,58 +187,31 @@ variable "templates" {
       perms         = string
     })
   )
-  default = []
-}
-
-variable "resources" {
-  type = object({
-    cpu    = number
-    memory = number
-  })
-  default = {
-    cpu    = 256,
-    memory = 384
-  }
-}
-
-variable "volumes" {
-  type = list(
-    object({
-      name            = string
-      type            = string
-      source          = string
-      read_only       = bool
-      access_mode     = string
-      attachment_mode = string
-    })
-  )
   default = [
     {
-      type            = "host"
-      name            = "data"
-      source          = "grafana"
-      read_only       = false
-      access_mode     = "single-node-single-writer"
-      attachment_mode = "file-system"
+      data          = <<EOH
+{
+  "inbounds": [
+    {
+      "protocol": "http",
+      "listen": "0.0.0.0",
+      "port": 1080
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom"
     }
   ]
 }
-
-variable "volume_mounts" {
-  type = list(
-    object({
-      volume        = string
-      destination   = string
-      read_only     = bool
-      selinux_label = string
-    })
-  )
-  default = [
-    {
-      volume        = "data"
-      destination   = "/var/lib/grafana"
-      read_only     = false
-      selinux_label = null
+      EOH
+      destination   = "$${NOMAD_TASK_DIR}/config.json"
+      change_mode   = "restart"
+      change_signal = null
+      env           = false
+      perms         = null
+      uid           = -1
+      gid           = -1
     }
   ]
 }
@@ -317,6 +227,43 @@ variable "artifacts" {
       source      = string
       destination = string
       mode        = string
+    })
+  )
+  default = []
+}
+
+variable "resources" {
+  type = object({
+    cpu    = number
+    memory = number
+  })
+  default = {
+    cpu    = 128,
+    memory = 128
+  }
+}
+
+variable "volumes" {
+  type = list(
+    object({
+      name            = string
+      type            = string
+      source          = string
+      read_only       = bool
+      access_mode     = string
+      attachment_mode = string
+    })
+  )
+  default = []
+}
+
+variable "volume_mounts" {
+  type = list(
+    object({
+      volume        = string
+      destination   = string
+      read_only     = bool
+      selinux_label = string
     })
   )
   default = []

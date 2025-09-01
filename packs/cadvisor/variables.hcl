@@ -71,7 +71,7 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-cadvisor"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
@@ -158,7 +158,7 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-cadvisor"
+            port = "envoy-proxy"
             proxy = {
               expose    = []
               config    = {}
@@ -209,9 +209,8 @@ variable "resources" {
     memory = number
   })
   default = {
-    cpu        = 96
-    memory     = 512
-    memory_max = 512
+    cpu    = 50
+    memory = 256
   }
 }
 
@@ -223,6 +222,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = []

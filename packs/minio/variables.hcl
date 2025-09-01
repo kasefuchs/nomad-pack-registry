@@ -71,19 +71,19 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-minio-api"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
       },
       {
-        name         = "connect-proxy-minio-console"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
       },
       {
-        name         = "service-check-minio-api"
+        name         = "service-check"
         to           = -1
         static       = 0
         host_network = "private"
@@ -176,7 +176,7 @@ variable "services" {
           name            = null
           path            = "/minio/health/live"
           expose          = false
-          port            = "service-check-minio-api"
+          port            = "service-check"
           protocol        = "http"
           task            = null
           timeout         = "5s"
@@ -191,14 +191,14 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-minio-api"
+            port = "envoy-proxy"
             proxy = {
               expose = [
                 {
                   path          = "/minio/health/live"
                   protocol      = "http"
                   local_port    = 9000
-                  listener_port = "service-check-minio-api"
+                  listener_port = "service-check"
                 }
               ]
               config    = {}
@@ -219,7 +219,7 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-minio-console"
+            port = "envoy-proxy"
             proxy = {
               expose    = []
               config    = {}
@@ -275,6 +275,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = []
@@ -322,7 +325,7 @@ variable "volumes" {
     {
       type            = "host"
       name            = "data"
-      source          = "minio-data"
+      source          = "minio"
       read_only       = false
       access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"

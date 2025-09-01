@@ -75,12 +75,6 @@ variable "network" {
         to           = -1
         static       = 0
         host_network = "connect"
-      },
-      {
-        name         = "service-check"
-        to           = -1
-        static       = 0
-        host_network = "private"
       }
     ]
     dns = null
@@ -154,32 +148,11 @@ variable "services" {
   )
   default = [
     {
-      name     = "grafana"
-      port     = "3000"
+      name     = "pgadmin"
+      port     = "80"
       tags     = []
       provider = "consul"
-      checks = [
-        {
-          address_mode    = null
-          args            = null
-          restart         = null
-          command         = null
-          interval        = "30s"
-          method          = null
-          body            = null
-          name            = null
-          path            = "/api/health"
-          expose          = false
-          port            = "service-check"
-          protocol        = "http"
-          task            = null
-          timeout         = "5s"
-          type            = "http"
-          tls_server_name = null
-          tls_skip_verify = false
-          headers         = null
-        }
-      ]
+      checks   = []
       connect = {
         native = false
         sidecar = {
@@ -187,14 +160,7 @@ variable "services" {
           service = {
             port = "envoy-proxy"
             proxy = {
-              expose = [
-                {
-                  path          = "/api/health"
-                  protocol      = "http"
-                  local_port    = 3000
-                  listener_port = "service-check"
-                }
-              ]
+              expose    = []
               config    = {}
               upstreams = []
             }
@@ -229,7 +195,7 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "grafana/grafana-oss:latest"
+    image      = "dpage/pgadmin4:latest"
     entrypoint = null
     args       = null
     volumes    = []
@@ -259,7 +225,7 @@ variable "resources" {
     memory = number
   })
   default = {
-    cpu    = 256,
+    cpu    = 150,
     memory = 384
   }
 }
@@ -279,7 +245,7 @@ variable "volumes" {
     {
       type            = "host"
       name            = "data"
-      source          = "grafana"
+      source          = "pgadmin"
       read_only       = false
       access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"
@@ -299,7 +265,7 @@ variable "volume_mounts" {
   default = [
     {
       volume        = "data"
-      destination   = "/var/lib/grafana"
+      destination   = "/var/lib/pgadmin"
       read_only     = false
       selinux_label = null
     }

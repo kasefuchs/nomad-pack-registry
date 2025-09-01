@@ -71,13 +71,13 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-gotify"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
       },
       {
-        name         = "service-check-gotify"
+        name         = "service-check"
         to           = -1
         static       = 0
         host_network = "private"
@@ -170,7 +170,7 @@ variable "services" {
           name            = null
           path            = "/health"
           expose          = false
-          port            = "service-check-gotify"
+          port            = "service-check"
           protocol        = "http"
           task            = null
           timeout         = "5s"
@@ -185,14 +185,14 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-gotify"
+            port = "envoy-proxy"
             proxy = {
               expose = [
                 {
                   path          = "/health"
                   protocol      = "http"
                   local_port    = 80
-                  listener_port = "service-check-gotify"
+                  listener_port = "service-check"
                 }
               ]
               config    = {}
@@ -245,6 +245,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = [
@@ -262,6 +265,9 @@ database:
       change_mode   = "restart"
       change_signal = null
       env           = false
+      perms         = null
+      uid           = -1
+      gid           = -1
     }
   ]
 }
@@ -308,7 +314,7 @@ variable "volumes" {
     {
       type            = "host"
       name            = "data"
-      source          = "gotify-data"
+      source          = "gotify"
       read_only       = false
       access_mode     = "single-node-single-writer"
       attachment_mode = "file-system"

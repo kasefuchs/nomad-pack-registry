@@ -71,13 +71,13 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "connect-proxy-miniflux"
+        name         = "envoy-proxy"
         to           = -1
         static       = 0
         host_network = "connect"
       },
       {
-        name         = "service-check-miniflux"
+        name         = "service-check"
         to           = -1
         static       = 0
         host_network = "private"
@@ -170,7 +170,7 @@ variable "services" {
           name            = null
           path            = "/healthcheck"
           expose          = false
-          port            = "service-check-miniflux"
+          port            = "service-check"
           protocol        = "http"
           task            = null
           timeout         = "5s"
@@ -185,14 +185,14 @@ variable "services" {
         sidecar = {
           task = null
           service = {
-            port = "connect-proxy-miniflux"
+            port = "envoy-proxy"
             proxy = {
               expose = [
                 {
                   path          = "/healthcheck"
                   protocol      = "http"
                   local_port    = 8080
-                  listener_port = "service-check-miniflux"
+                  listener_port = "service-check"
                 }
               ]
               config    = {}
@@ -245,6 +245,9 @@ variable "templates" {
       change_mode   = string
       change_signal = string
       env           = bool
+      uid           = number
+      gid           = number
+      perms         = string
     })
   )
   default = [
@@ -254,6 +257,9 @@ variable "templates" {
       change_mode   = "restart"
       change_signal = null
       env           = false
+      perms         = null
+      uid           = -1
+      gid           = -1
     }
   ]
 }
