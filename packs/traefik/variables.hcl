@@ -187,7 +187,7 @@ variable "docker_config" {
   default = {
     image      = "traefik:latest"
     entrypoint = null
-    args       = ["--configFile", "$${NOMAD_TASK_DIR}/static.yml"]
+    args       = ["--configFile", "$${NOMAD_TASK_DIR}/static.yaml"]
     volumes    = []
     privileged = false
   }
@@ -221,7 +221,7 @@ entryPoints:
   http:
     address: :80
       EOH
-      destination   = "$${NOMAD_TASK_DIR}/static.yml"
+      destination   = "$${NOMAD_TASK_DIR}/static.yaml"
       change_mode   = "restart"
       change_signal = null
       env           = false

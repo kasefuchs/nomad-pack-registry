@@ -148,8 +148,8 @@ variable "services" {
   )
   default = [
     {
-      name     = "ionscale"
-      port     = "8080"
+      name     = "v2ray-exporter"
+      port     = "9550"
       tags     = []
       provider = "consul"
       checks   = []
@@ -195,11 +195,22 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "ghcr.io/jsiebens/ionscale:latest"
+    image      = "wi1dcard/v2ray-exporter:master"
     entrypoint = null
-    args       = ["--config", "$${NOMAD_TASK_DIR}/config.yaml", "server"]
+    args       = ["--v2ray-endpoint", "127.0.0.1:54321"]
     volumes    = []
     privileged = false
+  }
+}
+
+variable "resources" {
+  type = object({
+    cpu    = number
+    memory = number
+  })
+  default = {
+    cpu    = 32,
+    memory = 64
   }
 }
 
@@ -216,48 +227,7 @@ variable "templates" {
       perms         = string
     })
   )
-  default = [
-    {
-      data          = <<EOH
----
-listen_addr: "127.0.0.1:8080"
-      EOH
-      destination   = "$${NOMAD_TASK_DIR}/config.yaml"
-      change_mode   = "restart"
-      change_signal = null
-      env           = false
-      perms         = null
-      uid           = -1
-      gid           = -1
-    }
-  ]
-}
-
-variable "environment" {
-  type    = map(string)
-  default = {}
-}
-
-variable "artifacts" {
-  type = list(
-    object({
-      source      = string
-      destination = string
-      mode        = string
-    })
-  )
   default = []
-}
-
-variable "resources" {
-  type = object({
-    cpu    = number
-    memory = number
-  })
-  default = {
-    cpu    = 50,
-    memory = 128
-  }
 }
 
 variable "volumes" {
@@ -286,6 +256,22 @@ variable "volume_mounts" {
   default = []
 }
 
+variable "environment" {
+  type    = map(string)
+  default = {}
+}
+
+variable "artifacts" {
+  type = list(
+    object({
+      source      = string
+      destination = string
+      mode        = string
+    })
+  )
+  default = []
+}
+
 variable "restart" {
   type = object({
     attempts         = number
@@ -295,7 +281,7 @@ variable "restart" {
     render_templates = bool
   })
   default = {
-    mode             = "fail"
+    mode             = "delay"
     delay            = "15s"
     interval         = "10m"
     attempts         = 3

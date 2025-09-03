@@ -197,7 +197,7 @@ variable "docker_config" {
   default = {
     image      = "ghcr.io/lavalink-devs/lavalink:latest"
     entrypoint = null
-    args       = ["--spring.config.location=$${NOMAD_TASK_DIR}/lavalink.yml"]
+    args       = ["--spring.config.location=$${NOMAD_TASK_DIR}/lavalink.yaml"]
     volumes    = []
     privileged = false
   }
@@ -224,7 +224,7 @@ server:
   port: 2333
   address: 0.0.0.0
       EOH
-      destination   = "$${NOMAD_TASK_DIR}/lavalink.yml"
+      destination   = "$${NOMAD_TASK_DIR}/lavalink.yaml"
       change_mode   = "restart"
       change_signal = null
       env           = false

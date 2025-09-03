@@ -71,6 +71,12 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
+        name         = "service"
+        to           = 631
+        static       = 631
+        host_network = "public"
+      },
+      {
         name         = "envoy-proxy"
         to           = -1
         static       = 0
@@ -148,8 +154,8 @@ variable "services" {
   )
   default = [
     {
-      name     = "ionscale"
-      port     = "8080"
+      name     = "cups"
+      port     = "631"
       tags     = []
       provider = "consul"
       checks   = []
@@ -195,11 +201,11 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "ghcr.io/jsiebens/ionscale:latest"
+    image      = "ghcr.io/kasefuchs/cups:latest"
     entrypoint = null
-    args       = ["--config", "$${NOMAD_TASK_DIR}/config.yaml", "server"]
+    args       = null
     volumes    = []
-    privileged = false
+    privileged = true
   }
 }
 
@@ -216,19 +222,58 @@ variable "templates" {
       perms         = string
     })
   )
+  default = []
+}
+
+variable "resources" {
+  type = object({
+    cpu    = number
+    memory = number
+  })
+  default = {
+    cpu    = 100,
+    memory = 256
+  }
+}
+
+variable "volumes" {
+  type = list(
+    object({
+      name            = string
+      type            = string
+      source          = string
+      read_only       = bool
+      access_mode     = string
+      attachment_mode = string
+    })
+  )
   default = [
     {
-      data          = <<EOH
----
-listen_addr: "127.0.0.1:8080"
-      EOH
-      destination   = "$${NOMAD_TASK_DIR}/config.yaml"
-      change_mode   = "restart"
-      change_signal = null
-      env           = false
-      perms         = null
-      uid           = -1
-      gid           = -1
+      type            = "host"
+      name            = "config"
+      source          = "cups"
+      read_only       = false
+      access_mode     = "single-node-single-writer"
+      attachment_mode = "file-system"
+    }
+  ]
+}
+
+variable "volume_mounts" {
+  type = list(
+    object({
+      volume        = string
+      destination   = string
+      read_only     = bool
+      selinux_label = string
+    })
+  )
+  default = [
+    {
+      volume        = "config"
+      destination   = "/etc/cups"
+      read_only     = false
+      selinux_label = null
     }
   ]
 }
@@ -244,43 +289,6 @@ variable "artifacts" {
       source      = string
       destination = string
       mode        = string
-    })
-  )
-  default = []
-}
-
-variable "resources" {
-  type = object({
-    cpu    = number
-    memory = number
-  })
-  default = {
-    cpu    = 50,
-    memory = 128
-  }
-}
-
-variable "volumes" {
-  type = list(
-    object({
-      name            = string
-      type            = string
-      source          = string
-      read_only       = bool
-      access_mode     = string
-      attachment_mode = string
-    })
-  )
-  default = []
-}
-
-variable "volume_mounts" {
-  type = list(
-    object({
-      volume        = string
-      destination   = string
-      read_only     = bool
-      selinux_label = string
     })
   )
   default = []

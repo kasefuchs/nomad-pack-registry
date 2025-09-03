@@ -231,7 +231,7 @@ variable "docker_config" {
   default = {
     image      = "prom/prometheus:latest"
     entrypoint = null
-    args       = ["--config.file=$${NOMAD_TASK_DIR}/prometheus.yml"]
+    args       = ["--config.file=$${NOMAD_TASK_DIR}/prometheus.yaml"]
     volumes    = []
     privileged = false
   }
@@ -268,7 +268,7 @@ variable "templates" {
 global:
   scrape_interval: 15s
       EOH
-      destination   = "$${NOMAD_TASK_DIR}/prometheus.yml"
+      destination   = "$${NOMAD_TASK_DIR}/prometheus.yaml"
       change_mode   = "restart"
       change_signal = null
       env           = false

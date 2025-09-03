@@ -8,7 +8,7 @@ variable "job_name" {
 
 variable "job_type" {
   type    = string
-  default = "service"
+  default = "system"
 }
 
 variable "ui" {
@@ -75,6 +75,12 @@ variable "network" {
         to           = -1
         static       = 0
         host_network = "connect"
+      },
+      {
+        name         = "service-check"
+        to           = -1
+        static       = 0
+        host_network = "private"
       }
     ]
     dns = null
@@ -148,11 +154,32 @@ variable "services" {
   )
   default = [
     {
-      name     = "ionscale"
-      port     = "8080"
+      name     = "vmagent"
+      port     = "8429"
       tags     = []
       provider = "consul"
-      checks   = []
+      checks = [
+        {
+          address_mode    = null
+          args            = null
+          restart         = null
+          command         = null
+          interval        = "30s"
+          method          = null
+          body            = null
+          name            = null
+          path            = "/-/healthy"
+          expose          = false
+          port            = "service-check"
+          protocol        = "http"
+          task            = null
+          timeout         = "5s"
+          type            = "http"
+          tls_server_name = null
+          tls_skip_verify = false
+          headers         = null
+        }
+      ]
       connect = {
         native = false
         sidecar = {
@@ -160,9 +187,21 @@ variable "services" {
           service = {
             port = "envoy-proxy"
             proxy = {
-              expose    = []
+              expose = [
+                {
+                  path          = "/-/healthy"
+                  protocol      = "http"
+                  local_port    = 8429
+                  listener_port = "service-check"
+                }
+              ]
               config    = {}
-              upstreams = []
+              upstreams = [
+                {
+                  name = "victoria-metrics"
+                  port = 8428
+                }
+              ]
             }
           }
         }
@@ -195,11 +234,22 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "ghcr.io/jsiebens/ionscale:latest"
+    image      = "victoriametrics/vmagent:latest"
     entrypoint = null
-    args       = ["--config", "$${NOMAD_TASK_DIR}/config.yaml", "server"]
+    args       = ["-promscrape.config=$${NOMAD_TASK_DIR}/vmagent.yaml", "-remoteWrite.url=http://127.0.0.1:8428/api/v1/write"]
     volumes    = []
     privileged = false
+  }
+}
+
+variable "resources" {
+  type = object({
+    cpu    = number
+    memory = number
+  })
+  default = {
+    cpu    = 50,
+    memory = 192
   }
 }
 
@@ -220,9 +270,10 @@ variable "templates" {
     {
       data          = <<EOH
 ---
-listen_addr: "127.0.0.1:8080"
+global:
+  scrape_interval: 15s
       EOH
-      destination   = "$${NOMAD_TASK_DIR}/config.yaml"
+      destination   = "$${NOMAD_TASK_DIR}/vmagent.yaml"
       change_mode   = "restart"
       change_signal = null
       env           = false
@@ -231,33 +282,6 @@ listen_addr: "127.0.0.1:8080"
       gid           = -1
     }
   ]
-}
-
-variable "environment" {
-  type    = map(string)
-  default = {}
-}
-
-variable "artifacts" {
-  type = list(
-    object({
-      source      = string
-      destination = string
-      mode        = string
-    })
-  )
-  default = []
-}
-
-variable "resources" {
-  type = object({
-    cpu    = number
-    memory = number
-  })
-  default = {
-    cpu    = 50,
-    memory = 128
-  }
 }
 
 variable "volumes" {
@@ -286,6 +310,22 @@ variable "volume_mounts" {
   default = []
 }
 
+variable "environment" {
+  type    = map(string)
+  default = {}
+}
+
+variable "artifacts" {
+  type = list(
+    object({
+      source      = string
+      destination = string
+      mode        = string
+    })
+  )
+  default = []
+}
+
 variable "restart" {
   type = object({
     attempts         = number
@@ -295,7 +335,7 @@ variable "restart" {
     render_templates = bool
   })
   default = {
-    mode             = "fail"
+    mode             = "delay"
     delay            = "15s"
     interval         = "10m"
     attempts         = 3

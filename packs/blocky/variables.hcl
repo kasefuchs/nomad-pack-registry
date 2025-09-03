@@ -230,7 +230,7 @@ variable "docker_config" {
   default = {
     image      = "spx01/blocky:latest"
     entrypoint = null
-    args       = ["--config=$${NOMAD_TASK_DIR}/blocky.yml"]
+    args       = ["--config=$${NOMAD_TASK_DIR}/blocky.yaml"]
     volumes    = []
     privileged = false
   }
@@ -270,7 +270,7 @@ bootstrapDns:
   - upstream: https://1.1.1.1/dns-query
   - upstream: https://1.0.0.1/dns-query
       EOH
-      destination   = "$${NOMAD_TASK_DIR}/blocky.yml"
+      destination   = "$${NOMAD_TASK_DIR}/blocky.yaml"
       change_mode   = "restart"
       change_signal = null
       env           = false

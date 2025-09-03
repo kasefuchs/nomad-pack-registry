@@ -75,6 +75,12 @@ variable "network" {
         to           = -1
         static       = 0
         host_network = "connect"
+      },
+      {
+        name         = "service-check"
+        to           = -1
+        static       = 0
+        host_network = "private"
       }
     ]
     dns = null
@@ -148,11 +154,32 @@ variable "services" {
   )
   default = [
     {
-      name     = "ionscale"
-      port     = "8080"
+      name     = "victoria-metrics"
+      port     = "8428"
       tags     = []
       provider = "consul"
-      checks   = []
+      checks = [
+        {
+          address_mode    = null
+          args            = null
+          restart         = null
+          command         = null
+          interval        = "30s"
+          method          = null
+          body            = null
+          name            = null
+          path            = "/-/healthy"
+          expose          = false
+          port            = "service-check"
+          protocol        = "http"
+          task            = null
+          timeout         = "5s"
+          type            = "http"
+          tls_server_name = null
+          tls_skip_verify = false
+          headers         = null
+        }
+      ]
       connect = {
         native = false
         sidecar = {
@@ -160,7 +187,14 @@ variable "services" {
           service = {
             port = "envoy-proxy"
             proxy = {
-              expose    = []
+              expose = [
+                {
+                  path          = "/-/healthy"
+                  protocol      = "http"
+                  local_port    = 8428
+                  listener_port = "service-check"
+                }
+              ]
               config    = {}
               upstreams = []
             }
@@ -195,11 +229,22 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "ghcr.io/jsiebens/ionscale:latest"
+    image      = "victoriametrics/victoria-metrics:latest"
     entrypoint = null
-    args       = ["--config", "$${NOMAD_TASK_DIR}/config.yaml", "server"]
+    args       = ["--selfScrapeInterval=15s", "-storageDataPath=/victoria-metrics-data"]
     volumes    = []
     privileged = false
+  }
+}
+
+variable "resources" {
+  type = object({
+    cpu    = number
+    memory = number
+  })
+  default = {
+    cpu    = 150,
+    memory = 512
   }
 }
 
@@ -216,19 +261,47 @@ variable "templates" {
       perms         = string
     })
   )
+  default = []
+}
+
+variable "volumes" {
+  type = list(
+    object({
+      name            = string
+      type            = string
+      source          = string
+      read_only       = bool
+      access_mode     = string
+      attachment_mode = string
+    })
+  )
   default = [
     {
-      data          = <<EOH
----
-listen_addr: "127.0.0.1:8080"
-      EOH
-      destination   = "$${NOMAD_TASK_DIR}/config.yaml"
-      change_mode   = "restart"
-      change_signal = null
-      env           = false
-      perms         = null
-      uid           = -1
-      gid           = -1
+      type            = "host"
+      name            = "data"
+      source          = "victoria-metrics"
+      read_only       = false
+      access_mode     = "single-node-single-writer"
+      attachment_mode = "file-system"
+    }
+  ]
+}
+
+variable "volume_mounts" {
+  type = list(
+    object({
+      volume        = string
+      destination   = string
+      read_only     = bool
+      selinux_label = string
+    })
+  )
+  default = [
+    {
+      volume        = "data"
+      destination   = "/victoria-metrics-data"
+      read_only     = false
+      selinux_label = null
     }
   ]
 }
@@ -249,43 +322,6 @@ variable "artifacts" {
   default = []
 }
 
-variable "resources" {
-  type = object({
-    cpu    = number
-    memory = number
-  })
-  default = {
-    cpu    = 50,
-    memory = 128
-  }
-}
-
-variable "volumes" {
-  type = list(
-    object({
-      name            = string
-      type            = string
-      source          = string
-      read_only       = bool
-      access_mode     = string
-      attachment_mode = string
-    })
-  )
-  default = []
-}
-
-variable "volume_mounts" {
-  type = list(
-    object({
-      volume        = string
-      destination   = string
-      read_only     = bool
-      selinux_label = string
-    })
-  )
-  default = []
-}
-
 variable "restart" {
   type = object({
     attempts         = number
@@ -295,7 +331,7 @@ variable "restart" {
     render_templates = bool
   })
   default = {
-    mode             = "fail"
+    mode             = "delay"
     delay            = "15s"
     interval         = "10m"
     attempts         = 3
