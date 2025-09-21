@@ -161,9 +161,9 @@ variable "services" {
       checks = [
         {
           address_mode    = null
-          args            = ["-c", "pg_isready"]
+          args            = null
           restart         = null
-          command         = "/bin/sh"
+          command         = "pg_isready"
           interval        = "30s"
           method          = null
           body            = null
@@ -290,7 +290,7 @@ variable "volumes" {
       name            = "data"
       source          = "postgresql"
       read_only       = false
-      access_mode     = "single-node-single-writer"
+      access_mode     = "single-node-writer"
       attachment_mode = "file-system"
     }
   ]

@@ -281,7 +281,7 @@ variable "volumes" {
       name            = "data"
       source          = "victoria-metrics"
       read_only       = false
-      access_mode     = "single-node-single-writer"
+      access_mode     = "single-node-writer"
       attachment_mode = "file-system"
     }
   ]

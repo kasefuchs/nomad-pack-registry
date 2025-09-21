@@ -253,7 +253,7 @@ variable "volumes" {
       name            = "config"
       source          = "home-assistant"
       read_only       = false
-      access_mode     = "single-node-single-writer"
+      access_mode     = "single-node-writer"
       attachment_mode = "file-system"
     }
   ]

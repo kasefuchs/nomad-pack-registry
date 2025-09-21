@@ -316,7 +316,7 @@ variable "volumes" {
       name            = "data"
       source          = "gotify"
       read_only       = false
-      access_mode     = "single-node-single-writer"
+      access_mode     = "single-node-writer"
       attachment_mode = "file-system"
     }
   ]

@@ -231,8 +231,8 @@ variable "resources" {
     memory = number
   })
   default = {
-    cpu    = 100,
-    memory = 256
+    cpu    = 10,
+    memory = 48
   }
 }
 
@@ -253,7 +253,7 @@ variable "volumes" {
       name            = "config"
       source          = "cups"
       read_only       = false
-      access_mode     = "single-node-single-writer"
+      access_mode     = "single-node-writer"
       attachment_mode = "file-system"
     }
   ]
