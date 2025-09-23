@@ -8,7 +8,7 @@ variable "job_name" {
 
 variable "job_type" {
   type    = string
-  default = "system"
+  default = "service"
 }
 
 variable "ui" {
@@ -75,12 +75,6 @@ variable "network" {
         to           = -1
         static       = 0
         host_network = "connect"
-      },
-      {
-        name         = "service-check"
-        to           = -1
-        static       = 0
-        host_network = "private"
       }
     ]
     dns = null
@@ -154,32 +148,11 @@ variable "services" {
   )
   default = [
     {
-      name     = "vmagent"
-      port     = "8429"
+      name     = "diun"
+      port     = "42286"
       tags     = []
       provider = "consul"
-      checks = [
-        {
-          address_mode    = null
-          args            = null
-          restart         = null
-          command         = null
-          interval        = "30s"
-          method          = null
-          body            = null
-          name            = null
-          path            = "/-/healthy"
-          expose          = false
-          port            = "service-check"
-          protocol        = "http"
-          task            = null
-          timeout         = "5s"
-          type            = "http"
-          tls_server_name = null
-          tls_skip_verify = false
-          headers         = null
-        }
-      ]
+      checks   = []
       connect = {
         native = false
         sidecar = {
@@ -187,21 +160,9 @@ variable "services" {
           service = {
             port = "envoy-proxy"
             proxy = {
-              expose = [
-                {
-                  path          = "/-/healthy"
-                  protocol      = "http"
-                  local_port    = 8429
-                  listener_port = "service-check"
-                }
-              ]
-              config = {}
-              upstreams = [
-                {
-                  name = "victoria-metrics"
-                  port = 8428
-                }
-              ]
+              expose    = []
+              config    = {}
+              upstreams = []
             }
           }
         }
@@ -234,22 +195,11 @@ variable "docker_config" {
     privileged = bool
   })
   default = {
-    image      = "victoriametrics/vmagent:latest"
+    image      = "ghcr.io/crazy-max/diun:latest"
     entrypoint = null
-    args       = ["-promscrape.config=$${NOMAD_TASK_DIR}/vmagent.yaml", "-remoteWrite.url=http://127.0.0.1:8428/api/v1/write"]
+    args       = ["serve", "--config=$${NOMAD_SECRETS_DIR}/diun.yaml"]
     volumes    = []
     privileged = false
-  }
-}
-
-variable "resources" {
-  type = object({
-    cpu    = number
-    memory = number
-  })
-  default = {
-    cpu    = 50,
-    memory = 192
   }
 }
 
@@ -270,10 +220,17 @@ variable "templates" {
     {
       data          = <<EOH
 ---
-global:
-  scrape_interval: 15s
+watch:
+  schedule: "0 */6 * * *"
+
+providers:
+  nomad:
+    address: unix://{{ env "NOMAD_SECRETS_DIR" }}/api.sock
+    secretID: {{ env "NOMAD_TOKEN" }}
+    namespace: {{ env "NOMAD_NAMESPACE" }}
+    watchByDefault: true
       EOH
-      destination   = "$${NOMAD_TASK_DIR}/vmagent.yaml"
+      destination   = "$${NOMAD_SECRETS_DIR}/diun.yaml"
       change_mode   = "restart"
       change_signal = null
       env           = false
@@ -282,6 +239,33 @@ global:
       gid           = -1
     }
   ]
+}
+
+variable "environment" {
+  type    = map(string)
+  default = {}
+}
+
+variable "artifacts" {
+  type = list(
+    object({
+      source      = string
+      destination = string
+      mode        = string
+    })
+  )
+  default = []
+}
+
+variable "resources" {
+  type = object({
+    cpu    = number
+    memory = number
+  })
+  default = {
+    cpu    = 20,
+    memory = 64
+  }
 }
 
 variable "volumes" {
@@ -310,22 +294,6 @@ variable "volume_mounts" {
   default = []
 }
 
-variable "environment" {
-  type    = map(string)
-  default = {}
-}
-
-variable "artifacts" {
-  type = list(
-    object({
-      source      = string
-      destination = string
-      mode        = string
-    })
-  )
-  default = []
-}
-
 variable "restart" {
   type = object({
     attempts         = number
@@ -335,7 +303,7 @@ variable "restart" {
     render_templates = bool
   })
   default = {
-    mode             = "delay"
+    mode             = "fail"
     delay            = "15s"
     interval         = "10m"
     attempts         = 3
@@ -354,7 +322,16 @@ variable "identities" {
       change_signal = string
     })
   )
-  default = []
+  default = [
+    {
+      name          = null
+      env           = true
+      file          = false
+      audience      = null
+      change_mode   = null
+      change_signal = null
+    }
+  ]
 }
 
 variable "count" {
