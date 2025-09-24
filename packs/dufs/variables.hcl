@@ -34,6 +34,11 @@ variable "namespace" {
   default = "default"
 }
 
+variable "node_pool" {
+  type    = string
+  default = "all"
+}
+
 variable "datacenters" {
   type    = list(string)
   default = ["*"]

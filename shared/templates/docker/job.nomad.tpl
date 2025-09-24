@@ -2,6 +2,7 @@ job [[ template "job_name" . ]] {
   type        = [[ var "job_type" . | quote ]]
   region      = [[ var "region" . | quote ]]
   namespace   = [[ var "namespace" . | quote ]]
+  node_pool   = [[ var "node_pool" . | quote ]]
   datacenters = [[ var "datacenters" . | toStringList ]]
 
   [[- $ui := var "ui" . -]]
