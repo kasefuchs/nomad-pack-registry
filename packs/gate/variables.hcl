@@ -116,6 +116,7 @@ variable "services" {
           type            = string
           tls_server_name = string
           tls_skip_verify = bool
+          on_update       = string
           headers         = string
         })
       )
@@ -182,6 +183,13 @@ variable "docker_config" {
     args       = list(string)
     volumes    = list(string)
     privileged = bool
+    devices = list(
+      object({
+        host_path          = string
+        container_path     = string
+        cgroup_permissions = string
+      })
+    )
   })
   default = {
     image      = "ghcr.io/minekube/gate:latest"
@@ -189,6 +197,7 @@ variable "docker_config" {
     args       = null
     volumes    = []
     privileged = false
+    devices    = []
   }
 }
 

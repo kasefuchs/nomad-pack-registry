@@ -205,6 +205,9 @@
         [[ if $check.tls_skip_verify -]]
         tls_skip_verify = [[ $check.tls_skip_verify ]]
         [[ end -]]
+        [[ if $check.on_update -]]
+        on_update = [[ $check.on_update | quote ]]
+        [[ end -]]
         [[ if $check.headers -]]
         [[ template "check_header" $check.headers ]]
         [[ end -]]
@@ -362,6 +365,23 @@
       }
 [[- end -]]
 
+[[ define "docker_devices" -]]
+        devices = [
+          [[- range $idx, $device := . ]]
+          [[- if $idx ]], [[ end ]]
+          {
+            host_path = [[ $device.host_path | quote ]]
+            [[ if $device.container_path -]]
+            container_path = [[ $device.container_path | quote ]]
+            [[ end -]]
+            [[ if $device.cgroup_permissions -]]
+            cgroup_permissions = [[ $device.cgroup_permissions | quote ]]
+            [[ end -]]
+          }
+          [[- end ]]
+        ]
+[[- end -]]
+
 [[ define "docker_config" -]]
 [[- $docker_config := . -]]
       config {
@@ -374,6 +394,9 @@
         [[ end -]]
         volumes = [[ $docker_config.volumes | toStringList ]]
         privileged = [[ $docker_config.privileged ]]
+        [[ if $docker_config.devices -]]
+        [[ template "docker_devices" $docker_config.devices ]]
+        [[ end -]]
       }
 [[- end -]]
 

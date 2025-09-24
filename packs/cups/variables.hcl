@@ -122,6 +122,7 @@ variable "services" {
           type            = string
           tls_server_name = string
           tls_skip_verify = bool
+          on_update       = string
           headers         = string
         })
       )
@@ -204,13 +205,27 @@ variable "docker_config" {
     args       = list(string)
     volumes    = list(string)
     privileged = bool
+    devices = list(
+      object({
+        host_path          = string
+        container_path     = string
+        cgroup_permissions = string
+      })
+    )
   })
   default = {
     image      = "ghcr.io/kasefuchs/cups:latest"
     entrypoint = null
     args       = null
     volumes    = []
-    privileged = true
+    privileged = false
+    devices = [
+      {
+        host_path          = "/dev/bus/usb"
+        container_path     = null
+        cgroup_permissions = null
+      }
+    ]
   }
 }
 

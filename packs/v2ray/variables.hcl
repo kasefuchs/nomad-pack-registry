@@ -109,6 +109,7 @@ variable "services" {
           type            = string
           tls_server_name = string
           tls_skip_verify = bool
+          on_update       = string
           headers         = string
         })
       )
@@ -169,6 +170,13 @@ variable "docker_config" {
     args       = list(string)
     volumes    = list(string)
     privileged = bool
+    devices = list(
+      object({
+        host_path          = string
+        container_path     = string
+        cgroup_permissions = string
+      })
+    )
   })
   default = {
     image      = "ghcr.io/v2fly/v2ray:v5.24"
@@ -176,6 +184,7 @@ variable "docker_config" {
     args       = ["run", "-config", "$${NOMAD_TASK_DIR}/config.json", "-format", "jsonv5"]
     volumes    = []
     privileged = false
+    devices    = []
   }
 }
 

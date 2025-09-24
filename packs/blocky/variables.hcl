@@ -128,6 +128,7 @@ variable "services" {
           type            = string
           tls_server_name = string
           tls_skip_verify = bool
+          on_update       = string
           headers         = string
         })
       )
@@ -231,6 +232,13 @@ variable "docker_config" {
     args       = list(string)
     volumes    = list(string)
     privileged = bool
+    devices = list(
+      object({
+        host_path          = string
+        container_path     = string
+        cgroup_permissions = string
+      })
+    )
   })
   default = {
     image      = "spx01/blocky:latest"
@@ -238,6 +246,7 @@ variable "docker_config" {
     args       = ["--config=$${NOMAD_TASK_DIR}/blocky.yaml"]
     volumes    = []
     privileged = false
+    devices    = []
   }
 }
 

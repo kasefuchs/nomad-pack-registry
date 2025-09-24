@@ -122,6 +122,7 @@ variable "services" {
           type            = string
           tls_server_name = string
           tls_skip_verify = bool
+          on_update       = string
           headers         = string
         })
       )
@@ -182,6 +183,7 @@ variable "services" {
           type            = "http"
           tls_server_name = null
           tls_skip_verify = false
+          on_update       = null
           headers         = null
         }
       ]
@@ -232,6 +234,13 @@ variable "docker_config" {
     args       = list(string)
     volumes    = list(string)
     privileged = bool
+    devices = list(
+      object({
+        host_path          = string
+        container_path     = string
+        cgroup_permissions = string
+      })
+    )
   })
   default = {
     image      = "prom/prometheus:latest"
@@ -239,6 +248,7 @@ variable "docker_config" {
     args       = ["--config.file=$${NOMAD_TASK_DIR}/prometheus.yaml"]
     volumes    = []
     privileged = false
+    devices    = []
   }
 }
 

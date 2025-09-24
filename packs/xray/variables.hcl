@@ -109,6 +109,7 @@ variable "services" {
           type            = string
           tls_server_name = string
           tls_skip_verify = bool
+          on_update       = string
           headers         = string
         })
       )
@@ -169,6 +170,13 @@ variable "docker_config" {
     args       = list(string)
     volumes    = list(string)
     privileged = bool
+    devices = list(
+      object({
+        host_path          = string
+        container_path     = string
+        cgroup_permissions = string
+      })
+    )
   })
   default = {
     image      = "teddysun/xray:latest"
@@ -176,6 +184,7 @@ variable "docker_config" {
     args       = ["run", "-c", "$${NOMAD_TASK_DIR}/config.json"]
     volumes    = []
     privileged = false
+    devices    = []
   }
 }
 
