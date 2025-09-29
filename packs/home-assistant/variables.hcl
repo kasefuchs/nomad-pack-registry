@@ -76,7 +76,7 @@ variable "network" {
     mode = "bridge"
     ports = [
       {
-        name         = "home-assistant"
+        name         = "service"
         to           = 8123
         static       = 8123
         host_network = "public"
@@ -198,28 +198,38 @@ variable "consul" {
   default = null
 }
 
-variable "docker_config" {
+variable "qemu_config" {
   type = object({
-    image      = string
-    entrypoint = list(string)
-    args       = list(string)
-    volumes    = list(string)
-    privileged = bool
-    devices = list(
-      object({
-        host_path          = string
-        container_path     = string
-        cgroup_permissions = string
-      })
-    )
+    image_path        = string
+    drive_interface   = string
+    accelerator       = string
+    graceful_shutdown = bool
+    guest_agent       = bool
+    port_map = map(number)
+    args     = list(string)
   })
+
   default = {
-    image      = "ghcr.io/home-assistant/home-assistant:stable"
-    entrypoint = null
-    args       = null
-    volumes    = []
-    privileged = false
-    devices    = []
+    image_path        = "/var/lib/nomad/qemu_images/home-assistant/image.qcow2"
+    drive_interface   = "ide"
+    accelerator       = "kvm"
+    graceful_shutdown = true
+    guest_agent       = false
+    port_map = {}
+    args = [
+      # UEFI
+      "-drive", "if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd",
+      "-drive", "if=pflash,format=raw,file=/var/lib/nomad/qemu_images/home-assistant/OVMF_VARS_4M.fd",
+
+      # Network (since Nomad one is broken https://github.com/hashicorp/nomad/issues/10033)
+      "-netdev", "user,id=user.0,hostfwd=tcp::8123-:8123",
+      "-device", "virtio-net,netdev=user.0",
+
+      # QEMU agent (because guest_agent breaks the network)
+      "-device", "virtio-serial",
+      "-chardev", "socket,path=/var/lib/nomad/alloc/$${NOMAD_ALLOC_ID}/$${NOMAD_TASK_NAME}/qa.sock,server=on,wait=off,id=qga0",
+      "-device", "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0",
+    ]
   }
 }
 
@@ -245,51 +255,9 @@ variable "resources" {
     memory = number
   })
   default = {
-    cpu    = 256,
-    memory = 512
+    cpu    = 400
+    memory = 2048
   }
-}
-
-variable "volumes" {
-  type = list(
-    object({
-      name            = string
-      type            = string
-      source          = string
-      read_only       = bool
-      access_mode     = string
-      attachment_mode = string
-    })
-  )
-  default = [
-    {
-      type            = "host"
-      name            = "config"
-      source          = "home-assistant"
-      read_only       = false
-      access_mode     = "single-node-writer"
-      attachment_mode = "file-system"
-    }
-  ]
-}
-
-variable "volume_mounts" {
-  type = list(
-    object({
-      volume        = string
-      destination   = string
-      read_only     = bool
-      selinux_label = string
-    })
-  )
-  default = [
-    {
-      volume        = "config"
-      destination   = "/config"
-      read_only     = false
-      selinux_label = null
-    }
-  ]
 }
 
 variable "environment" {
