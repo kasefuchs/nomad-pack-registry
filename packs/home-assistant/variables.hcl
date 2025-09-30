@@ -73,32 +73,21 @@ variable "network" {
     })
   })
   default = {
-    mode = "bridge"
-    ports = [
-      {
-        name         = "service"
-        to           = 8123
-        static       = 8123
-        host_network = "public"
-      },
-      {
-        name         = "envoy-proxy"
-        to           = -1
-        static       = 0
-        host_network = "connect"
-      }
-    ]
-    dns = null
+    mode  = "host"
+    ports = []
+    dns   = null
   }
 }
 
 variable "services" {
   type = list(
     object({
-      name     = string
-      port     = string
-      tags     = list(string)
-      provider = string
+      name         = string
+      port         = string
+      tags         = list(string)
+      provider     = string
+      address      = string
+      address_mode = string
       checks = list(
         object({
           address_mode = string
@@ -158,29 +147,7 @@ variable "services" {
       })
     })
   )
-  default = [
-    {
-      name     = "home-assistant"
-      port     = "8123"
-      tags     = []
-      provider = "consul"
-      checks   = []
-      connect = {
-        native = false
-        sidecar = {
-          task = null
-          service = {
-            port = "envoy-proxy"
-            proxy = {
-              expose    = []
-              config    = {}
-              upstreams = []
-            }
-          }
-        }
-      }
-    }
-  ]
+  default = []
 }
 
 variable "vault" {
@@ -205,8 +172,8 @@ variable "qemu_config" {
     accelerator       = string
     graceful_shutdown = bool
     guest_agent       = bool
-    port_map = map(number)
-    args     = list(string)
+    port_map          = map(number)
+    args              = list(string)
   })
 
   default = {
@@ -215,15 +182,15 @@ variable "qemu_config" {
     accelerator       = "kvm"
     graceful_shutdown = true
     guest_agent       = false
-    port_map = {}
+    port_map          = {}
     args = [
       # UEFI
       "-drive", "if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd",
       "-drive", "if=pflash,format=raw,file=/var/lib/nomad/qemu_images/home-assistant/OVMF_VARS_4M.fd",
 
       # Network (since Nomad one is broken https://github.com/hashicorp/nomad/issues/10033)
-      "-netdev", "user,id=user.0,hostfwd=tcp::8123-:8123",
-      "-device", "virtio-net,netdev=user.0",
+      "-netdev", "bridge,id=net0,br=br0",
+      "-device", "virtio-net,netdev=net0",
 
       # QEMU agent (because guest_agent breaks the network)
       "-device", "virtio-serial",

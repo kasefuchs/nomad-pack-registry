@@ -152,9 +152,14 @@
 [[ define "service" -]]
 [[- $service := . -]]
     service {
-      name     = [[ $service.name | quote ]]
-      port     = [[ $service.port | quote ]]
-      provider = [[ $service.provider | quote ]]
+      name         = [[ $service.name | quote ]]
+      port         = [[ $service.port | quote ]]
+      provider     = [[ $service.provider | quote ]]
+      address_mode = [[ $service.address_mode | quote ]]
+
+      [[ if $service.address -]]
+      address = [[ $service.address | quote ]]
+      [[ end -]]
 
       [[ if $service.tags -]]
       tags = [[ $service.tags | toStringList ]]

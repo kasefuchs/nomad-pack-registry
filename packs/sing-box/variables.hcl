@@ -82,10 +82,12 @@ variable "network" {
 variable "services" {
   type = list(
     object({
-      name     = string
-      port     = string
-      tags     = list(string)
-      provider = string
+      name         = string
+      port         = string
+      tags         = list(string)
+      provider     = string
+      address      = string
+      address_mode = string
       checks = list(
         object({
           address_mode = string

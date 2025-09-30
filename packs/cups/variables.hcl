@@ -95,10 +95,12 @@ variable "network" {
 variable "services" {
   type = list(
     object({
-      name     = string
-      port     = string
-      tags     = list(string)
-      provider = string
+      name         = string
+      port         = string
+      tags         = list(string)
+      provider     = string
+      address      = string
+      address_mode = string
       checks = list(
         object({
           address_mode = string
@@ -160,11 +162,15 @@ variable "services" {
   )
   default = [
     {
-      name     = "cups"
-      port     = "631"
-      tags     = []
-      provider = "consul"
-      checks   = []
+      name         = "cups"
+      port         = "631"
+      tags         = []
+      provider     = "consul"
+      address      = null
+      address_mode = "auto"
+      address      = null
+      address_mode = "auto"
+      checks       = []
       connect = {
         native = false
         sidecar = {
