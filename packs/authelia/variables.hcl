@@ -251,7 +251,7 @@ variable "docker_config" {
   default = {
     image      = "ghcr.io/authelia/authelia:latest"
     entrypoint = null
-    args       = null
+    args       = ["/app/authelia", "--config=$${NOMAD_TASK_DIR}/config.yaml"]
     volumes    = []
     privileged = false
     devices    = []
@@ -271,7 +271,72 @@ variable "templates" {
       perms         = string
     })
   )
-  default = []
+  default = [
+    {
+      # language="GoTemplate"
+      data          = <<EOH
+---
+authentication_backend:
+  file:
+    path: {{ env "NOMAD_TASK_DIR" }}/users.yaml
+    watch: true
+  password_reset:
+    disable: true
+  password_change:
+    disable: true
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: private.example.com
+      policy: one_factor
+
+session:
+  secret: insecure_session_secret
+  cookies:
+    - domain: example.com
+      authelia_url: https://authelia.example.com
+
+storage:
+  encryption_key: insecure_storage_secret
+  local:
+    path: {{ env "NOMAD_TASK_DIR" }}/db.sqlite3
+
+notifier:
+  disable_startup_check: false
+  filesystem:
+    filename: {{ env "NOMAD_TASK_DIR" }}/notifier.txt
+      EOH
+      destination   = "$${NOMAD_TASK_DIR}/config.yaml"
+      change_mode   = "restart"
+      change_signal = null
+      env           = false
+      perms         = null
+      uid           = -1
+      gid           = -1
+    },
+    {
+      # language="GoTemplate"
+      data          = <<EOH
+---
+# yaml-language-server: $schema=https://www.authelia.com/schemas/latest/json-schema/user-database.json
+users:
+  john:
+    disabled: false
+    displayname: John Doe
+    password: $argon2id$v=19$m=65536,t=3,p=2$BpLnfgDsc2WD8F2q$o/vzA4myCqZZ36bUGsDY//8mKUYNZZaR0t4MFFSs+iM
+    email: john.doe@example.com
+    groups: []
+      EOH
+      destination   = "$${NOMAD_TASK_DIR}/users.yaml"
+      change_mode   = "noop"
+      change_signal = null
+      env           = false
+      perms         = null
+      uid           = -1
+      gid           = -1
+    }
+  ]
 }
 
 variable "environment" {
