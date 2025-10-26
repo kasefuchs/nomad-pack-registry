@@ -55,6 +55,37 @@ variable "constraints" {
   default = []
 }
 
+variable "network" {
+  type = object({
+    mode = string
+    ports = list(
+      object({
+        name         = string
+        to           = number
+        static       = number
+        host_network = string
+      })
+    )
+    dns = object({
+      servers  = list(string)
+      searches = list(string)
+      options  = list(string)
+    })
+  })
+  default = {
+    mode = "bridge"
+    ports = [
+      {
+        name         = "envoy-proxy"
+        to           = -1
+        static       = 0
+        host_network = "connect"
+      }
+    ]
+    dns = null
+  }
+}
+
 variable "services" {
   type = list(
     object({
@@ -125,8 +156,8 @@ variable "services" {
   )
   default = [
     {
-      name         = "dnstt"
-      port         = "dns"
+      name         = "stash"
+      port         = "9999"
       tags         = []
       provider     = "consul"
       address      = null
@@ -134,7 +165,20 @@ variable "services" {
       address      = null
       address_mode = "auto"
       checks       = []
-      connect      = null
+      connect = {
+        native = false
+        sidecar = {
+          task = null
+          service = {
+            port = "envoy-proxy"
+            proxy = {
+              expose    = []
+              config    = {}
+              upstreams = []
+            }
+          }
+        }
+      }
     }
   ]
 }
@@ -154,37 +198,6 @@ variable "consul" {
   default = null
 }
 
-variable "network" {
-  type = object({
-    mode = string
-    ports = list(
-      object({
-        name         = string
-        to           = number
-        static       = number
-        host_network = string
-      })
-    )
-    dns = object({
-      servers  = list(string)
-      searches = list(string)
-      options  = list(string)
-    })
-  })
-  default = {
-    mode = "bridge"
-    ports = [
-      {
-        name         = "dns"
-        to           = 5300
-        static       = 5300
-        host_network = "local"
-      }
-    ]
-    dns = null
-  }
-}
-
 variable "docker_config" {
   type = object({
     image      = string
@@ -201,12 +214,29 @@ variable "docker_config" {
     )
   })
   default = {
-    image      = "ghcr.io/kasefuchs/dnstt:latest"
+    image      = "ghcr.io/kasefuchs/stash:latest"
     entrypoint = null
     args       = null
     volumes    = []
-    privileged = false
-    devices    = []
+    privileged = true
+    devices = [
+      {
+        host_path          = "/dev/fuse"
+        container_path     = null
+        cgroup_permissions = null
+      }
+    ]
+  }
+}
+
+variable "resources" {
+  type = object({
+    cpu    = number
+    memory = number
+  })
+  default = {
+    cpu    = 100
+    memory = 512
   }
 }
 
@@ -226,6 +256,49 @@ variable "templates" {
   default = []
 }
 
+
+variable "volumes" {
+  type = list(
+    object({
+      name            = string
+      type            = string
+      source          = string
+      read_only       = bool
+      access_mode     = string
+      attachment_mode = string
+    })
+  )
+  default = [
+    {
+      type            = "host"
+      name            = "data"
+      source          = "stash"
+      read_only       = false
+      access_mode     = "single-node-writer"
+      attachment_mode = "file-system"
+    }
+  ]
+}
+
+variable "volume_mounts" {
+  type = list(
+    object({
+      volume        = string
+      destination   = string
+      read_only     = bool
+      selinux_label = string
+    })
+  )
+  default = [
+    {
+      volume        = "data"
+      destination   = "/encrypted"
+      read_only     = false
+      selinux_label = null
+    }
+  ]
+}
+
 variable "environment" {
   type    = map(string)
   default = {}
@@ -242,43 +315,6 @@ variable "artifacts" {
   default = []
 }
 
-variable "resources" {
-  type = object({
-    cpu    = number
-    memory = number
-  })
-  default = {
-    cpu    = 20,
-    memory = 64
-  }
-}
-
-variable "volumes" {
-  type = list(
-    object({
-      name            = string
-      type            = string
-      source          = string
-      read_only       = bool
-      access_mode     = string
-      attachment_mode = string
-    })
-  )
-  default = []
-}
-
-variable "volume_mounts" {
-  type = list(
-    object({
-      volume        = string
-      destination   = string
-      read_only     = bool
-      selinux_label = string
-    })
-  )
-  default = []
-}
-
 variable "restart" {
   type = object({
     attempts         = number
@@ -290,9 +326,9 @@ variable "restart" {
   default = {
     mode             = "delay"
     delay            = "15s"
-    interval         = "5m"
+    interval         = "10m"
     attempts         = 3
-    render_templates = true
+    render_templates = false
   }
 }
 

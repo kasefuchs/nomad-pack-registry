@@ -164,7 +164,7 @@ variable "services" {
       address_mode = "auto"
       address      = null
       address_mode = "auto"
-      checks = []
+      checks       = []
       connect = {
         native = false
         sidecar = {
@@ -172,7 +172,7 @@ variable "services" {
           service = {
             port = "envoy-proxy"
             proxy = {
-              expose = []
+              expose    = []
               config    = {}
               upstreams = []
             }
@@ -240,7 +240,7 @@ variable "templates" {
 }
 
 variable "environment" {
-  type    = map(string)
+  type = map(string)
   default = {
     BIND = ":8080"
   }
