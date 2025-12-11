@@ -1,6 +1,3 @@
-# Copyright (c) Kasefuchs
-# SPDX-License-Identifier: MIT
-
 app {
   url = "https://www.bamsoftware.com/software/dnstt/"
 }
